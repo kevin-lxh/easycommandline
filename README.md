@@ -15,12 +15,12 @@ import sys
 from easycommandline import program, arg
 
 program.version('1.0.1')
-program.options([
+program.options(
     ('-r', '--red'),
     ('-g', '--green'),
     ('-b', '--blue'),
     ('-w', '--white'),
-    ])
+    )
 program.parse(sys.argv)
 
 if arg('red'):
@@ -55,7 +55,7 @@ def sum(value, previous_value):
     return previous_value + int(value)
 
 program.version('1.0.1')
-program.options([
+program.options(
         ('-r', '--recursive'),
         ('-p', '--preload', 'preload enabled'),
         ('-n', '--name', 'username'),
@@ -65,7 +65,7 @@ program.options([
         ('-c', '--collection [example]', 'collection', collect, []), # reduce args to a single arg/object, '[]' is the initial value
         ('-x', '--range A..B', 'range', make_range),
         ('-s', '--sum', 'the sum of numbers', sum, 0),
-    ])
+    )
 program.parse(sys.argv)
 
 print 'recursive  : ', arg('recursive')

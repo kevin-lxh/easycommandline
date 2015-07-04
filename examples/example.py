@@ -13,7 +13,7 @@ def sum(value, previous_value):
     return previous_value + int(value)
 
 program.version('1.0.1')
-program.options([
+program.options(
         ('-r', '--recursive'),
         ('-p', '--preload', 'preload enabled'),
         ('-n', '--name', 'username'),
@@ -23,7 +23,7 @@ program.options([
         ('-c', '--collection [example]', 'collection', collect, []),
         ('-x', '--range A..B', 'range', make_range),
         ('-s', '--sum', 'the sum of numbers', sum, 0),
-    ])
+    )
 program.parse(sys.argv)
 
 print 'recursive  : ', arg('recursive')

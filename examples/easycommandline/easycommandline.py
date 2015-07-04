@@ -45,7 +45,7 @@ class Commander(object):
         self.__version = version
 
 
-    def options(self, options):
+    def options(self, *options):
         for a_list in options:
             try:
                 option = Option(a_list)
