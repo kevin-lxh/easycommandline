@@ -38,7 +38,7 @@ $ python favcolor.py -r -w
 
 # Coercion
 ```python
-# file demo.py
+# file example.py
 
 import sys
 from easycommandline import program, arg
@@ -78,7 +78,7 @@ print 'range      : ', arg('range')
 print 'sum        : ', arg('sum')
 ```
 ```
-$ python demo.py -p --name Tracy -i 1000 --range 5..8 -s 1 2 3 4
+$ python example.py -p --name Tracy -i 1000 --range 5..8 -s 1 2 3 4
     recursive  :  None
     preload    :  True
     name       :  Tracy
@@ -91,9 +91,9 @@ $ python demo.py -p --name Tracy -i 1000 --range 5..8 -s 1 2 3 4
 
 # Automated --help
 ```
-$ python demo.py -h
+$ python example.py -h
 
-    Usage: python demo.py [options]
+    Usage: python example.py [options]
 
     Options:
 
