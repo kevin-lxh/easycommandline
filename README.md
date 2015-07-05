@@ -93,7 +93,7 @@ $ python demo.py -p --name Tracy -i 1000 --range 5..8 -s 1 2 3 4
 ```
 $ python demo.py -h
 
-    Usage: python example.py [options]
+    Usage: python demo.py [options]
 
     Options:
 
