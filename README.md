@@ -62,7 +62,7 @@ program.options(
         ('-i', '--integer <int>', 'an integer argument', int),
         ('-f', '--float <float>', 'a float argument', float),
         ('-a', '--anotherfloat', 'another float argument', float),
-        ('-c', '--collection [example]', 'collection', collect, []), # reduce args to a single arg/object, '[]' is the initial value
+        ('-c', '--collection [example]', 'collection', collect, []), # reduce args to a single object, '[]' is the initial value
         ('-x', '--range A..B', 'range', make_range),
         ('-s', '--sum', 'the sum of numbers', sum, 0),
     )
