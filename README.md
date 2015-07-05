@@ -78,7 +78,7 @@ print 'range      : ', program.range
 print 'sum        : ', program.sum
 ```
 ```
-$ python example.py -p --name Tracy -i 1000 --range 5..8 -s 1 2 3 4
+$ python demo.py -p --name Tracy -i 1000 --range 5..8 -s 1 2 3 4
     recursive  :  None
     preload    :  True
     name       :  Tracy
