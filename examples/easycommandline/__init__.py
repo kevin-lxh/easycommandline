@@ -1,1 +1,1 @@
-from easycommandline import program, arg
+from easycommandline import program

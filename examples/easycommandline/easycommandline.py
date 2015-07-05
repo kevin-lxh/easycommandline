@@ -1,7 +1,8 @@
 import sys
+import re
 
 class Option(object):
-    def __init__(self, option): # arg => (symbol, fullname, description, action, initial_arg)
+    def __init__(self, option): # params (symbol, fullname, description, action, initial_arg)
         if isinstance(option, (list, tuple)) == False or len(option) < 2:
             raise Exception('option name missing')
 
@@ -10,15 +11,32 @@ class Option(object):
         self.fullname = option[1].strip()
         name_components = self.fullname.split(' ')
         self.name = name_components[0]
-        
+
+
+        if not Option.is_valid_symbol(self.symbol):
+            raise Exception('`({0}, {1}, ...)` is invalid, the symbol must start with `-`, such as `-f`'.format(self.symbol, self.fullname))
+
+        if not Option.is_valid_name(self.name):
+            raise Exception('`({0}, {1}, ...)` is invalid, the option name must start with `--`, such as `--foo`'.format(self.symbol, self.fullname))
+
         self.description = option[2] if len(option) >= 3 else ''
         self.action = option[3] if len(option) >= 4 else None
 
         self.initial_arg_set = len(option) >= 5
-        self.arg = option[4] if self.initial_arg_set else None
+        self.initial_arg = option[4] if self.initial_arg_set else None
 
         self.arg_required = self.action is not None
-        
+
+
+    @classmethod
+    def is_valid_symbol(cls, text):
+        return (re.match(r'^-[a-zA-Z]', text) is not None)
+
+
+    @classmethod
+    def is_valid_name(cls, text):
+        return (re.match(r'^--[a-zA-Z]', text) is not None)
+
 
 class Commander(object):
     def __init__(self):
@@ -26,21 +44,19 @@ class Commander(object):
         self.__version = '1.0.1'
 
         self.__options = []
-        self.__symbol_to_option_mapping = {}
-        self.__name_to_option_mapping = {}
+        self.__name_to_argument_mapping = {}
 
         self.__max_length_of_name = 0
         self.__max_length_of_description = 0
 
-        help = Option(['-h', '--help', 'output usage information'])
-        help.arg_required = False
-        self.__append_option(help)
+        self.options(
+            ('-h', '--help', 'output usage information'),
+            ('-V', '--version', 'output the version number'),
+            )
 
-        version = Option(['-V', '--version', 'output the version number'])
-        version.arg_required = False
-        self.__append_option(version)
+        self.arguments = None
 
-
+        
     def version(self, version):
         self.__version = version
 
@@ -59,21 +75,28 @@ class Commander(object):
     def __append_option(self, option):
         self.__options.append(option)
 
-        self.__symbol_to_option_mapping[option.symbol] = option
-        self.__name_to_option_mapping[option.name] = option
+        self.__name_to_argument_mapping[option.name] = option.initial_arg
 
         self.__max_length_of_name = max(len(option.fullname), self.__max_length_of_name)
         self.__max_length_of_description = max(len(option.description), self.__max_length_of_description)
 
 
+    def __find_option_by_symbol_or_name(self, symbol_or_name):
+        for option in self.__options:
+            if option.symbol == symbol_or_name or option.name == symbol_or_name:
+                return option
+
+        return None
+
+
     def parse(self, argv):
-        self.__argv = argv[:]
-        self.__script_name = self.__argv.pop(0)
+        argv = argv[:]
+        self.__script_name = argv.pop(0)
 
         start_index = 0
         while True:
             try:
-                location, length = self.range_for_option(start_index)
+                location, length = self.__range_for_option(start_index, argv)
             except Exception, e:
                 self.__print_exception(e)
                 sys.exit()
@@ -82,37 +105,68 @@ class Commander(object):
                 break
 
             # find option
-            symbol_or_name = self.__argv[location]
-            option = self.__symbol_to_option_mapping.get(symbol_or_name)
-            if option is None:
-                option = self.__name_to_option_mapping.get(symbol_or_name)
+            symbol_or_name = argv[location]
+            option = self.__find_option_by_symbol_or_name(symbol_or_name)
 
-            # option.arg
-            arguments = self.__argv[location+1 : location+length]
-            if len(arguments) == 0:
+            # parse argv
+            arguments_for_option = argv[(location+1) : (location+length)]
+            if len(arguments_for_option) == 0:
                 if option.arg_required:
                     self.__print_exception('option `{0}, {1}` argument missing'.format(option.symbol, option.fullname))
                     sys.exit()
                 else:
-                    option.arg = True
+                    self.__name_to_argument_mapping[option.name] = True
 
             else:
                 if option.action:
                     if option.initial_arg_set: # reduce
-                        for value in arguments:
-                            option.arg = option.action(value, option.arg)
+                        for value in arguments_for_option:
+                            previous_value = self.__name_to_argument_mapping[option.name]
+                            new_value = option.action(value, previous_value)
+                            self.__name_to_argument_mapping[option.name] = new_value
 
                     else: # call action with first argument
-                        option.arg = option.action(arguments[0])
+                        value = option.action(arguments_for_option[0])
+                        self.__name_to_argument_mapping[option.name] = value
 
                 else:
-                    option.arg = arguments[0]
+                    value = arguments_for_option[0]
+                    self.__name_to_argument_mapping[option.name] = arguments_for_option[0]
 
             # start_index
             start_index = location + length
 
-        self.__did_parse_argv()
+        self.__did_parse_argv()           
 
+
+    def __range_for_option(self, start_index, argv):
+        location = None
+        length = 0
+
+        for index in range(start_index, len(argv)):
+            text = argv[index]
+
+            is_option = False
+            if Option.is_valid_symbol(text) or Option.is_valid_name(text):
+                if self.__find_option_by_symbol_or_name(text):
+                    is_option = True
+                else:
+                    raise Exception("unknown option `{0}`".format(text))
+                
+            # location, length
+            if is_option:
+                if location is None:
+                    location = index
+                    length = 1
+                else:
+                    break
+
+            else: 
+                if location is not None:
+                    length += 1
+
+        return (location, length)
+    
 
     def __did_parse_argv(self):
         if self.arg('help'):
@@ -122,52 +176,15 @@ class Commander(object):
         if self.arg('version'):
             self.__print_version()
             sys.exit()
+
+        for option_name in self.__name_to_argument_mapping:
+            attr = option_name[2:]
+            setattr(self, attr, self.__name_to_argument_mapping[option_name])
             
 
-    def arg(self, option_name):
-        option_name = '--' + option_name
-        option = self.__name_to_option_mapping.get(option_name)
-        if option:
-            return option.arg
-        else:
-            return None
-
-
-    def range_for_option(self, start_index):
-        option_start_index = 0
-        option_length = 0
-
-        for index in range(start_index, len(self.__argv)):
-            text = self.__argv[index]
-
-            is_option_prefix = False
-
-            # symbol
-            if text[:2] == '--' and len(text) != 2:
-                if self.__name_to_option_mapping.get(text) is not None:
-                    is_option_prefix = True
-                else:
-                    raise Exception("unknown option `{0}`".format(text))
-
-            elif text[:1] == '-' and len(text) != 1 and text != '--':
-                if self.__symbol_to_option_mapping.get(text) is not None:
-                    is_option_prefix = True
-                else:
-                    raise Exception("unknown option `{0}`".format(text))                    
-
-            # index
-            if is_option_prefix:
-                if option_length == 0:
-                    option_start_index = index
-                    option_length = 1
-                else:
-                    break
-
-            else: 
-                if option_length > 0:
-                    option_length += 1
-
-        return (option_start_index, option_length)
+    def arg(self, attr_name):
+        key = '--' + attr_name
+        return self.__name_to_argument_mapping[key]
 
 
     def __print_help(self):
@@ -191,5 +208,4 @@ class Commander(object):
         print('\n  error: {0}\n'.format(e))
 
 
-program = Commander()
-arg = program.arg
+program = eval('Commander()') # eval, avoid syntax checking

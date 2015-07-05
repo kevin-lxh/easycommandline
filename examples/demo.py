@@ -1,5 +1,5 @@
 import sys
-from easycommandline import program, arg
+from easycommandline import program
 
 def collect(value, previous_value):
     previous_value.append(value)
@@ -26,11 +26,11 @@ program.options(
     )
 program.parse(sys.argv)
 
-print 'recursive  : ', arg('recursive')
-print 'preload    : ', arg('preload')
-print 'name       : ', arg('name')
-print 'integer    : ', arg('integer')
-print 'float      : ', arg('float')
-print 'collection : ', arg('collection')
-print 'range      : ', arg('range')
-print 'sum        : ', arg('sum')
+print 'recursive  : ', program.recursive
+print 'preload    : ', program.preload
+print 'name       : ', program.name
+print 'integer    : ', program.integer
+print 'float      : ', program.float
+print 'collection : ', program.collection
+print 'range      : ', program.range
+print 'sum        : ', program.sum

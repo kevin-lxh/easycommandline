@@ -12,7 +12,7 @@ Options are defined with the `.options()` method, also serving as documentation 
 # file favcolor.py
 
 import sys
-from easycommandline import program, arg
+from easycommandline import program
 
 program.version('1.0.1')
 program.options(
@@ -23,11 +23,11 @@ program.options(
     )
 program.parse(sys.argv)
 
-if arg('red'):
+if program.red:
     print('- red')
-if arg('blue'):
+if program.blue:
     print('- blue')
-if arg('white'):
+if program.white:
     print('- white')
 ```
 ```
@@ -38,10 +38,10 @@ $ python favcolor.py -r -w
 
 # Coercion
 ```python
-# file example.py
+# file demo.py
 
 import sys
-from easycommandline import program, arg
+from easycommandline import program
 
 def collect(value, previous_value):
     previous_value.append(value)
@@ -62,20 +62,20 @@ program.options(
         ('-i', '--integer <int>', 'an integer argument', int),
         ('-f', '--float <float>', 'a float argument', float),
         ('-a', '--anotherfloat', 'another float argument', float),
-        ('-c', '--collection [example]', 'collection', collect, []), # reduce args to a single object, '[]' is the initial value
+        ('-c', '--collection [example]', 'collection', collect, []),
         ('-x', '--range A..B', 'range', make_range),
         ('-s', '--sum', 'the sum of numbers', sum, 0),
     )
 program.parse(sys.argv)
 
-print 'recursive  : ', arg('recursive')
-print 'preload    : ', arg('preload')
-print 'name       : ', arg('name')
-print 'integer    : ', arg('integer')
-print 'float      : ', arg('float')
-print 'collection : ', arg('collection')
-print 'range      : ', arg('range')
-print 'sum        : ', arg('sum')
+print 'recursive  : ', program.recursive
+print 'preload    : ', program.preload
+print 'name       : ', program.name
+print 'integer    : ', program.integer
+print 'float      : ', program.float
+print 'collection : ', program.collection
+print 'range      : ', program.range
+print 'sum        : ', program.sum
 ```
 ```
 $ python example.py -p --name Tracy -i 1000 --range 5..8 -s 1 2 3 4
@@ -91,7 +91,7 @@ $ python example.py -p --name Tracy -i 1000 --range 5..8 -s 1 2 3 4
 
 # Automated --help
 ```
-$ python example.py -h
+$ python demo.py -h
 
     Usage: python example.py [options]
 
