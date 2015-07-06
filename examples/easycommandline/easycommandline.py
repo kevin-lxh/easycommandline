@@ -30,7 +30,7 @@ class Option(object):
 
     @classmethod
     def is_valid_symbol(cls, text):
-        return (re.match(r'^-[a-zA-Z]', text) is not None)
+        return (re.match(r'^-[a-zA-Z]$', text) is not None)
 
 
     @classmethod
@@ -104,7 +104,7 @@ class OptionParser(object):
         for index in range(start_index, len(self.__argv)):
             text = self.__argv[index]
 
-            is_option_symbol_or_name = ( Option.is_valid_symbol(text) or Option.is_valid_name(text) )
+            is_option_symbol_or_name = ( Option.is_valid_symbol(text[:2]) or Option.is_valid_name(text) )
             if is_option_symbol_or_name:
                 if self.__find_option_by_symbol_or_name(text) is None:
                     raise Exception("unknown option `{0}`".format(text))
