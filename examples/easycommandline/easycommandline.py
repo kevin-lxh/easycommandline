@@ -208,4 +208,4 @@ class Commander(object):
         print('\n  error: {0}\n'.format(e))
 
 
-program = eval('Commander()') # eval, avoid from methods checking for `program`
+program = eval('Commander()') # eval, avoid methods checking to `program`
