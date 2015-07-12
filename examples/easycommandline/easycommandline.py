@@ -1,4 +1,5 @@
 import sys
+import os
 import re
 import terminalstyle as style
 import inspect
@@ -432,8 +433,9 @@ class Program(object):
         self.__script_name = ''
         self.__version = ''
 
-        self.__builtin_cmd = self.__create_buildin_cmd()
-        self.__outter_cmds = []
+        self.__cmds = []
+        self.__setup_buildin_cmd()
+        self.__builtin_cmd = self.__cmds[0]
         
 
     def version(self, version):
@@ -445,6 +447,9 @@ class Program(object):
 
 
     def cmd(self, cmd_format):
+        if cmd_format.strip() == '' and len(self.__cmds) > 0:
+            return self.__builtin_cmd
+
         cmd = Command(cmd_format)
         cmd.options(self.HELP_OPTION_INFO)
         @cmd.action
@@ -453,20 +458,18 @@ class Program(object):
                 self.print_help(cmd)
                 sys.exit()
 
-        self.__outter_cmds.append(cmd)
+        self.__cmds.append(cmd)
         return cmd
 
 
     def parse_argv(self):
-        self.__script_name = sys.argv[0]
+        self.__script_name = os.path.basename(sys.argv[0])
         raw_args = sys.argv[1:]
 
         try:
-            for cmd in self.__outter_cmds:
+            for cmd in self.__cmds:
                 if cmd.perform(raw_args):
                     return
-
-            self.__builtin_cmd.perform(raw_args)
 
         except UsageException, e:
             print('\n  Error: {0}\n'.format(e))
@@ -498,19 +501,21 @@ class Program(object):
         print('')
 
         # print commands
-        if (cmd != self.__builtin_cmd and len(cmd_name) != 0) or\
-            len(self.__outter_cmds) == 0:
+        if cmd != self.__builtin_cmd or len(self.__cmds) == 1:
             return
 
         print(style.bold('  Commands:'))
             
         max_length_of_cmd_name = 0
-        for cmd in self.__outter_cmds:
+        for cmd in self.__cmds:
             cmd_name, cmd_args, description, options = cmd.details()
             max_length_of_cmd_name = max(len(cmd_name), max_length_of_cmd_name)
 
-        for cmd in self.__outter_cmds:
+        for cmd in self.__cmds:
             cmd_name, cmd_args, description, options = cmd.details()
+            if cmd == self.__builtin_cmd:
+                continue
+
             text = '  {0:{width}}   {1}'.format(
                     cmd_name,
                     description,
@@ -521,15 +526,12 @@ class Program(object):
         print('')
 
 
-    def __create_buildin_cmd(self):
-        cmd = Command('')
-        cmd.options(self.HELP_OPTION_INFO, self.VERSION_OPTION_INFO)
+    def __setup_buildin_cmd(self):
+        cmd = self.cmd('')
+        cmd.options(self.VERSION_OPTION_INFO)
         @cmd.action
         def action(cmd, *args):
-            if cmd.help:
-                self.print_help(cmd)
-                sys.exit()
-            elif cmd.version:
+            if cmd.version:
                 print self.__version
                 sys.exit()
 
@@ -538,8 +540,6 @@ class Program(object):
                 attr = option.name[2:]
                 argument = getattr(cmd, attr)
                 setattr(self, attr, argument)
-
-        return cmd
 
 
 
