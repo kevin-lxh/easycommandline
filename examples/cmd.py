@@ -6,8 +6,8 @@ program.version('1.0.1')
 
 cmd = program.cmd('cd <path>')
 cmd.options(
-        ('-c', '--create', 'create directory if not existed'),
-        )
+    ('-c', '--create', 'create directory if not existed'),
+    )
 cmd.description('change directory')
 @cmd.action
 def action_for_cmd_cd(cmd, path):

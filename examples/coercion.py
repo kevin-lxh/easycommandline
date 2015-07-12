@@ -13,15 +13,15 @@ def sum(value, previous_value):
 
 program.version('1.0.1')
 program.options(
-        ('-r', '--recursive'),
-        ('-p', '--preload', 'preload enabled'),
-        ('-n', '--name', 'username'),
-        ('-i', '--integer <int>', 'an integer argument', int),
-        ('-f', '--float <float>', 'a float argument', float),
-        ('-a', '--anotherfloat', 'another float argument', float),
-        ('-c', '--collection [example]', 'collection', collect, []),
-        ('-x', '--range A..B', 'range', make_range),
-        ('-s', '--sum', 'the sum of numbers', sum, 0),
+    ('-r', '--recursive'),
+    ('-p', '--preload', 'preload enabled'),
+    ('-n', '--name', 'username'),
+    ('-i', '--integer <int>', 'an integer argument', int),
+    ('-f', '--float <float>', 'a float argument', float),
+    ('-a', '--anotherfloat', 'another float argument', float),
+    ('-c', '--collection [example]', 'collection', collect, []),
+    ('-x', '--range A..B', 'range', make_range),
+    ('-s', '--sum', 'the sum of numbers', sum, 0),
     )
 program.parse_argv()
 
