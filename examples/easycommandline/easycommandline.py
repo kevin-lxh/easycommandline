@@ -486,7 +486,8 @@ class Program(object):
         print('')
 
         # print commands
-        if cmd != self.__builtin_cmd or len(self.__outter_cmds) == 0:
+        if (cmd != self.__builtin_cmd and len(cmd_name) != 0) or\
+            len(self.__outter_cmds) == 0:
             return
 
         print(style.bold('  Commands:'))
