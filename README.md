@@ -125,7 +125,7 @@ $ python cmd.py start server ~/Desktop/abc production
 
 # Automated --help
 ```
-$ python demo.py -h
+$ python coercion.py -h
 
     Usage: python demo.py [options]
 
