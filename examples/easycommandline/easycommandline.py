@@ -359,7 +359,19 @@ class Command(object):
                 escaped_text = re.sub(r'[\.\$\^\{\[\(\|\)\*\+\?\\]', (lambda m : '\\'+m.group()), c.value)
                 regx.append(escaped_text)
 
-        return '^' + '\s*'.join(regx)
+            elif c.type == c.TYPE_OPTIONS:
+                if self.__is_arguments_specified():
+                    regx.append('(((-[a-zA-Z]+|--[a-zA-Z]+)(\s+|$))*)')
+                else:
+                    regx.append('(((-[a-zA-Z]+|--[a-zA-Z]+)((\s+[^\s\-]+)*)|\s+|$)*)')
+
+            elif c.type == c.TYPE_ARG_REQUIRED:
+                regx.append('([^\s\-]+)')
+
+            elif c.type == c.TYPE_ARG_OPTIONAL:
+                regx.append('([^\s\-]*)')
+
+        return '^' + '\s*'.join(regx) + '$'
 
 
     def __extract_args_for_action(self, raw_args):
