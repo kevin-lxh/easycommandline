@@ -11,7 +11,6 @@ Options are defined with the `.options()` method, also serving as documentation 
 ```python
 # file favcolor.py
 
-import sys
 from easycommandline import program
 
 program.version('1.0.1')
@@ -21,7 +20,7 @@ program.options(
     ('-b', '--blue'),
     ('-w', '--white'),
     )
-program.parse(sys.argv)
+program.parse_argv()
 
 if program.red:
     print('- red')
@@ -40,7 +39,6 @@ $ python favcolor.py -r -w
 ```python
 # file demo.py
 
-import sys
 from easycommandline import program
 
 def collect(value, previous_value):
@@ -66,7 +64,7 @@ program.options(
         ('-x', '--range A..B', 'range', make_range),
         ('-s', '--sum', 'the sum of numbers', sum, 0),
     )
-program.parse(sys.argv)
+program.parse_argv()
 
 print 'recursive  : ', program.recursive
 print 'preload    : ', program.preload

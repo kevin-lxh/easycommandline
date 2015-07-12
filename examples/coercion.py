@@ -1,4 +1,3 @@
-import sys
 from easycommandline import program
 
 def collect(value, previous_value):
@@ -24,13 +23,13 @@ program.options(
         ('-x', '--range A..B', 'range', make_range),
         ('-s', '--sum', 'the sum of numbers', sum, 0),
     )
-program.parse(sys.argv)
+program.parse_argv()
 
-print 'recursive  : ', program.recursive
-print 'preload    : ', program.preload
-print 'name       : ', program.name
-print 'integer    : ', program.integer
-print 'float      : ', program.float
-print 'collection : ', program.collection
-print 'range      : ', program.range
-print 'sum        : ', program.sum
+print('recursive  : ', program.recursive)
+print('preload    : ', program.preload)
+print('name       : ', program.name)
+print('integer    : ', program.integer)
+print('float      : ', program.float)
+print('collection : ', program.collection)
+print('range      : ', program.range)
+print('sum        : ', program.sum)
