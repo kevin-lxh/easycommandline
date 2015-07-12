@@ -15,10 +15,10 @@ from easycommandline import program
 
 program.version('1.0.1')
 program.options(
-    ('-r', '--red'),
-    ('-g', '--green'),
-    ('-b', '--blue'),
-    ('-w', '--white'),
+        ('-r', '--red'),
+        ('-g', '--green'),
+        ('-b', '--blue'),
+        ('-w', '--white'),
     )
 program.parse_argv()
 
