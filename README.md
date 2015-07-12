@@ -37,7 +37,7 @@ $ python favcolor.py -r -w
 
 # Coercion
 ```python
-# file demo.py
+# file coercion.py
 
 from easycommandline import program
 
@@ -66,17 +66,17 @@ program.options(
     )
 program.parse_argv()
 
-print 'recursive  : ', program.recursive
-print 'preload    : ', program.preload
-print 'name       : ', program.name
-print 'integer    : ', program.integer
-print 'float      : ', program.float
-print 'collection : ', program.collection
-print 'range      : ', program.range
-print 'sum        : ', program.sum
+print('recursive  : ', program.recursive)
+print('preload    : ', program.preload)
+print('name       : ', program.name)
+print('integer    : ', program.integer)
+print('float      : ', program.float)
+print('collection : ', program.collection)
+print('range      : ', program.range)
+print('sum        : ', program.sum)
 ```
 ```
-$ python demo.py -p --name Tracy -i 1000 --range 5..8 -s 1 2 3 4
+$ python coercion.py -p --name Tracy -i 1000 --range 5..8 -s 1 2 3 4
     recursive  :  None
     preload    :  True
     name       :  Tracy
@@ -87,9 +87,45 @@ $ python demo.py -p --name Tracy -i 1000 --range 5..8 -s 1 2 3 4
     sum        :  10
 ```
 
+# Command
+```python
+# file cmd.py
+
+from easycommandline import program
+import os
+
+program.version('1.0.1')
+
+
+cmd = program.cmd('cd <path>')
+cmd.options(
+        ('-c', '--create', 'create directory if not existed'),
+        )
+cmd.description('change directory')
+@cmd.action
+def action_for_cmd_cd(cmd, path):
+    if cmd.create and not os.path.exists(path):
+        os.makedirs(path)
+
+
+
+cmd = program.cmd('start server <path> [env]')
+@cmd.action
+def action_for_cmd_start_server(cmd, path, env):
+    print(path)
+    print(env)
+
+
+program.parse_argv()
+
+```
+```
+$ python cmd.py start server ~/Desktop/abc production
+```
+
 # Automated --help
 ```
-$ python demo.py -h
+$ python coercion.py -h
 
     Usage: python demo.py [options]
 
