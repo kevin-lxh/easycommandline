@@ -122,6 +122,7 @@ program.parse_argv()
 
 ```
 ```
+$ python cmd.py cd ~/Desktop/abc -c
 $ python cmd.py start server ~/Desktop/abc production
 ```
 
