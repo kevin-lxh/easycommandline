@@ -242,6 +242,8 @@ class Command(object):
         matcher = self.__matcher()
         raw_args_str = ' '.join(raw_args)
 
+        print '123', matcher, raw_args_str
+
         match = re.match(matcher, raw_args_str)
         if match is None:
             return False
@@ -275,7 +277,11 @@ class Command(object):
         name = ' '.join(name)
         args = ' '.join(args)
 
-        return (name, args, self.__description[:], self.__options[:])
+        return (name, args, self.__description[:], self.__options[:], self.__components[:])
+
+
+    def sort_key(self):
+        return len(self.__components)
 
 
     def __components_for_format(self):
@@ -314,13 +320,13 @@ class Command(object):
         # validate
         self.__validate_components(components)
             
-        # options
-        component = CommandComponent(CommandComponent.TYPE_OPTIONS, None)
-        if args_start_index is not None: # arguments are specified, can take options after command name or the last argument
-            components.insert(args_start_index, component)
-            components.append(component)
-        else:
-            components.append(component)
+        # # options
+        # component = CommandComponent(CommandComponent.TYPE_OPTIONS, None)
+        # if args_start_index is not None: # arguments are specified, can take options after command name or the last argument
+        #     components.insert(args_start_index, component)
+        #     components.append(component)
+        # else:
+        #     components.append(component)
 
         return components
 
@@ -360,19 +366,19 @@ class Command(object):
                 escaped_text = re.sub(r'[\.\$\^\{\[\(\|\)\*\+\?\\]', (lambda m : '\\'+m.group()), c.value)
                 regx.append(escaped_text)
 
-            elif c.type == c.TYPE_OPTIONS:
-                if self.__is_arguments_specified():
-                    regx.append('(((-[a-zA-Z]+|--[a-zA-Z]+)(\s+|$))*)')
-                else:
-                    regx.append('(((-[a-zA-Z]+|--[a-zA-Z]+)((\s+[^\s\-]+)*)|\s+|$)*)')
+            # elif c.type == c.TYPE_OPTIONS:
+            #     if self.__is_arguments_specified():
+            #         regx.append('(((-[a-zA-Z]+|--[a-zA-Z]+)(\s+|$))*)')
+            #     else:
+            #         regx.append('(((-[a-zA-Z]+|--[a-zA-Z]+)((\s+[^\s\-]+)*)|\s+|$)*)')
 
-            elif c.type == c.TYPE_ARG_REQUIRED:
-                regx.append('([^\s\-]+)')
+            # elif c.type == c.TYPE_ARG_REQUIRED:
+            #     regx.append('([^\s\-]+)')
 
-            elif c.type == c.TYPE_ARG_OPTIONAL:
-                regx.append('([^\s\-]*)')
+            # elif c.type == c.TYPE_ARG_OPTIONAL:
+            #     regx.append('([^\s\-]*)')
 
-        return '^' + '\s*'.join(regx) + '$'
+        return '^' + '(\s+|$)'.join(regx)
 
 
     def __extract_args_for_action(self, raw_args):
@@ -434,8 +440,7 @@ class Program(object):
         self.__version = ''
 
         self.__cmds = []
-        self.__setup_buildin_cmd()
-        self.__builtin_cmd = self.__cmds[0]
+        self.__builtin_cmd = self.__setup_buildin_cmd()
         
 
     def version(self, version):
@@ -467,7 +472,7 @@ class Program(object):
         raw_args = sys.argv[1:]
 
         try:
-            for cmd in self.__cmds:
+            for cmd in self.__sorted_cmds():
                 if cmd.perform(raw_args):
                     return
 
@@ -478,7 +483,7 @@ class Program(object):
 
     def print_help(self, cmd):
         # print options
-        cmd_name, cmd_args, description, options = cmd.details()
+        cmd_name, cmd_args, description, options, components = cmd.details()
 
         print('')
         cmd_name_width = len(cmd_name) + 2 if len(cmd_name) > 0 else 1
@@ -508,11 +513,11 @@ class Program(object):
             
         max_length_of_cmd_name = 0
         for cmd in self.__cmds:
-            cmd_name, cmd_args, description, options = cmd.details()
+            cmd_name, cmd_args, description, options, components = cmd.details()
             max_length_of_cmd_name = max(len(cmd_name), max_length_of_cmd_name)
 
         for cmd in self.__cmds:
-            cmd_name, cmd_args, description, options = cmd.details()
+            cmd_name, cmd_args, description, options, components = cmd.details()
             if cmd == self.__builtin_cmd:
                 continue
 
@@ -535,15 +540,26 @@ class Program(object):
                 print self.__version
                 sys.exit()
 
-            name, args, description, options = cmd.details()
+            name, args, description, options, components = cmd.details()
             for option in options:
                 attr = option.name[2:]
                 argument = getattr(cmd, attr)
                 setattr(self, attr, argument)
+
+        return cmd
+
+
+    def __sorted_cmds(self):
+        def key(cmd):
+            cmd_name, cmd_args, description, options, components = cmd.details()
+            return len(cmd_name)
+
+        return sorted(self.__cmds, key=key, reverse=True)
 
 
 
 
 
 program = eval('Program()') # eval, avoid methods checking to `program`
+
 
