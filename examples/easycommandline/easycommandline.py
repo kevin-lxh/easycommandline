@@ -159,10 +159,10 @@ class OptionParser(object):
                 if option.initial_val_set:
                     for arg in args:
                         previous_value = a_single_argument
-                        a_single_argument = self.__perform_action(option.action, arg, previous_value)
+                        a_single_argument = self.__invoke_option_action(option.action, arg, previous_value)
 
                 else: # call action with first arg
-                    a_single_argument = self.__perform_action(option.action, args[0])
+                    a_single_argument = self.__invoke_option_action(option.action, args[0])
 
             else:
                 a_single_argument = args[0]
@@ -178,15 +178,13 @@ class OptionParser(object):
         return None
 
 
-    def __perform_action(self, action, *args):
+    def __invoke_option_action(self, action, *args):
         spec = inspect.getargspec(action)
         if len(spec.args) != len(args):
             error = 'option action `{0}()` takes {1} arguments ({2} declared)'.format(action.__name__, len(args), len(spec.args))
             raise DevelopmentException(error)
 
-        r = action(*args)    
-        
-        return r
+        return action(*args)
 
 
 
@@ -202,6 +200,7 @@ class CommandComponent(object):
     def __init__(self, a_type, value):
         self.type = a_type
         self.value = value        
+
 
 
 
@@ -242,8 +241,6 @@ class Command(object):
         matcher = self.__matcher()
         raw_args_str = ' '.join(raw_args)
 
-        print '123', matcher, raw_args_str
-
         match = re.match(matcher, raw_args_str)
         if match is None:
             return False
@@ -260,7 +257,7 @@ class Command(object):
         # perform action
         if len(self.__actions) > 0:
             args = self.__extract_args_for_action(raw_args)
-            self.__perform_actions(args)
+            self.__trigger_actions(args)
 
         return True
 
@@ -278,10 +275,6 @@ class Command(object):
         args = ' '.join(args)
 
         return (name, args, self.__description[:], self.__options[:], self.__components[:])
-
-
-    def sort_key(self):
-        return len(self.__components)
 
 
     def __components_for_format(self):
@@ -320,14 +313,6 @@ class Command(object):
         # validate
         self.__validate_components(components)
             
-        # # options
-        # component = CommandComponent(CommandComponent.TYPE_OPTIONS, None)
-        # if args_start_index is not None: # arguments are specified, can take options after command name or the last argument
-        #     components.insert(args_start_index, component)
-        #     components.append(component)
-        # else:
-        #     components.append(component)
-
         return components
 
 
@@ -366,18 +351,6 @@ class Command(object):
                 escaped_text = re.sub(r'[\.\$\^\{\[\(\|\)\*\+\?\\]', (lambda m : '\\'+m.group()), c.value)
                 regx.append(escaped_text)
 
-            # elif c.type == c.TYPE_OPTIONS:
-            #     if self.__is_arguments_specified():
-            #         regx.append('(((-[a-zA-Z]+|--[a-zA-Z]+)(\s+|$))*)')
-            #     else:
-            #         regx.append('(((-[a-zA-Z]+|--[a-zA-Z]+)((\s+[^\s\-]+)*)|\s+|$)*)')
-
-            # elif c.type == c.TYPE_ARG_REQUIRED:
-            #     regx.append('([^\s\-]+)')
-
-            # elif c.type == c.TYPE_ARG_OPTIONAL:
-            #     regx.append('([^\s\-]*)')
-
         return '^' + '(\s+|$)'.join(regx)
 
 
@@ -413,7 +386,7 @@ class Command(object):
         return False
 
 
-    def __perform_actions(self, args):
+    def __trigger_actions(self, args):
         for action in self.__actions:
             spec = inspect.getargspec(action)
             if spec.varargs is None:
