@@ -127,7 +127,7 @@ $ python cmd.py start server ~/Desktop/abc production
 ```
 $ python coercion.py -h
 
-    Usage: python demo.py [options]
+    Usage: python coercion.py [options]
 
     Options:
 
