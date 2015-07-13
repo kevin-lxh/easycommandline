@@ -88,7 +88,7 @@ $ python coercion.py -p --name Tracy -i 1000 --range 5..8 -s 1 2 3 4
 ```
 
 # Command
-specify  
+specifies  
 argument required with `< >`  
 argument optional with `[ ]`, cannot specify more than **one** optional argument
 ```python
