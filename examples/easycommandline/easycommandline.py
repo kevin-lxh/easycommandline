@@ -345,13 +345,13 @@ class Command(object):
 
 
     def __matcher(self):
-        regx = []
+        regxes = []
         for c in self.__components:
             if c.type == c.TYPE_CMD_NAME:
                 escaped_text = re.sub(r'[\.\$\^\{\[\(\|\)\*\+\?\\]', (lambda m : '\\'+m.group()), c.value)
-                regx.append(escaped_text)
+                regxes.append(escaped_text + '(\s+|$)')
 
-        return '^' + '(\s+|$)'.join(regx)
+        return '^' + ''.join(regxes)
 
 
     def __extract_args_for_action(self, raw_args):
